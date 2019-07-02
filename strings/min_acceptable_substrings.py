@@ -60,16 +60,16 @@ def _build_dp(s, crit):
 
     for ii in range(1, N+1):
         if crit(s[ii-1]) != True:
-            print(s[ii-1], "fails single")
+            #print(s[ii-1], "fails single")
             table[ii] = -1
             continue
-        print(s[ii-1], "passes")
+        #print(s[ii-1], "passes")
         table[ii] = flag_val
         #for jj in range(ii-1, -1, -1):
         for jj in range(0, ii):
             if crit(s[jj:ii]):
-                print("   '{}'".format(s[jj:ii]), "passes")
-                print("      ",jj,ii-1)
+                #print("   '{}'".format(s[jj:ii]), "passes")
+                #print("      ",jj,ii-1)
                 if jj == 0:
                     # full substring matches
                     table[ii] = 1
@@ -78,10 +78,10 @@ def _build_dp(s, crit):
                     table[ii] = min(table[ii], table[jj] + 1)
         if table[ii] == flag_val:
             # no matching strings here
-            print("total miss")
+            #print("total miss")
             table[ii] = -1
-        print("   ", table)
-    print(table)
+        #print("   ", table)
+    #print(table)
     return table
 
 def dp(s, crit):
