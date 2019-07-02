@@ -29,23 +29,41 @@ def test_leftmost():
     s = "123ab"
     assert min_acceptable_substrings.leftmost(s, 3, len(s), char_run) == 4
 
-def test_min_acceptable_tricky():
+def test_min_brute_tricky():
     s = "123ab12"
     assert min_acceptable_substrings.brute(s, char_run) == 3
 
-def test_min_acceptable():
+def test_min_dp_tricky():
+    s = "123ab12"
+    assert min_acceptable_substrings.dp(s, char_run) == 3
+
+def test_min_brute():
     s = "123ab"
     assert min_acceptable_substrings.brute(s, char_run) == 2
     s = "123"
     assert min_acceptable_substrings.brute(s, char_run) == 1
 
-def test_min_acceptable_rejects():
+def test_min_brute_rejects():
     s = "****"
     assert min_acceptable_substrings.brute(s, char_run) == -1
     s = "1111****"
     assert min_acceptable_substrings.brute(s, char_run) == -1
     s = "1111*11111"
     assert min_acceptable_substrings.brute(s, char_run) == -1
+
+def test_db_accepts():
+    s = "123ab"
+    assert min_acceptable_substrings.dp(s, char_run) == 2
+    s = "123"
+    assert min_acceptable_substrings.dp(s, char_run) == 1
+
+def test_dp_rejects():
+    s = "****"
+    assert min_acceptable_substrings.dp(s, char_run) == -1
+    s = "1111****"
+    assert min_acceptable_substrings.dp(s, char_run) == -1
+    s = "1111*11111"
+    assert min_acceptable_substrings.dp(s, char_run) == -1
 
 def test_PSH():
     test_str = hex(3001 * 3001)#[2:]
