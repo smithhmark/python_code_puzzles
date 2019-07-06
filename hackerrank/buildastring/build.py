@@ -61,57 +61,27 @@ def dp_fw(single, substr, target):
     N = len(target)
     ti = 0
     dp = [0] * (N+1)
-    min_copy = math.ceil(substr/single)
+    min_copy = _min_width(single, substr)
     #print(single, substr, target)
     while ti < N:
-        print(" {} : {}".format(ti,target[ti]))
+        #print(" {} : {}".format(ti,target[ti]))
         dpi = ti + 1
-        ss_len = min_copy
-        found = 0
-        found_at = -1
-        st = target[ti:ti+ss_len]
-        #print("  matching from?", st)
-        found = target.find(st, 0, ti)
-        matched = ''
-        while found > -1 and ss_len <= ti and ti + ss_len <= N:
-            found_at =  found
-            matched = st
-            ss_len += 1
-            st = target[ti:ti+ss_len]
-            found = target.find(st, found, ti)
-            #print("    matching?", st)
-            #print("    found?", found)
-            #print("    ss_len", ss_len, "?<", ti)
-            #print("    ti+ss_len=", ti+ss_len, " is ", ti+ss_len <= N)
-        if found_at >= 0:
-            #print("   found '{}' at {}".format(st, found_at))
-            #print("   matched '{}' at {}".format(matched, found_at))
-            ss_len -= 1
-            matched_len = len(matched)
-            append_cost = dp[dpi-1]+(matched_len * single)
-            #print("    acost", append_cost)
-            copy_cost = dp[dpi-1]+substr
-            #print("    ccost", copy_cost)
-            if append_cost < copy_cost:
-                dp[dpi] = dp[dpi-1]+single
-                ti += 1
-            else:
-                for offset in range(matched_len):
-                    dp[dpi + offset] = copy_cost
-                #print("  jumping fwd:",matched_len)
-                dp[dpi+matched_len-1] = copy_cost
-                ti += len(matched)
+        append_cost = dp[dpi-1] + single
+        longest, whr = _find_longest_ending_here(target, ti)
+        if longest is None:
+            copy_cost = sys.maxsize
         else:
-            dp[dpi] = dp[dpi-1]+single
-            ti += 1
-        #print(dp)
-        #print([], list(target))
+            matched_len = len(longest)
+            copy_cost = substr + dp[dpi-matched_len]
+        final_cost = min(append_cost, copy_cost)
+        dp[dpi] = final_cost
+        ti += 1
     return dp
 
 def cost_to_build(single, substr, target):
-    #table1 = dp_fw(single, substr, target)
-    #return table1[-1]
-    return recursive(single, substr, target)
+    table1 = dp_fw(single, substr, target)
+    return table1[-1]
+    #return recursive(single, substr, target)
 
 SUBSTR_MEMO = {}
 COST_MEMO = {}

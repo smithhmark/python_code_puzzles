@@ -26,6 +26,22 @@ case5 = [
     ]
 expt5=[65040, 126246, 268964, ]
 
+case7_path = './input07.txt'
+expt7 = [107176, 471776, 2607120 ]
+
+def load_cases(path):
+    cases = []
+    with open(path, "r") as ifil:
+        cnt = int(ifil.readline())
+        for _ in range(cnt):
+            [lenth, a, b] = list(map(int, ifil.readline().split()))
+            target = ifil.readline().strip()
+            if len(target) != lenth:
+                print("ut oh")
+            else:
+                cases.append((a, b, target))
+    return cases
+
 def test_case_simple1():
     assert build.cost_to_build(1,2, "aab") == 3
 
@@ -55,9 +71,10 @@ def test_recursive_case_simple2():
     ss = "ab12ab"
     assert build.recursive(2,3, ss) == 11
 
-def no_test_dp_simple0():
+def test_dp_simple0():
     ss = "aab"
     t1 = build.dp_fw(1,2,ss)
+    print(t1)
     assert max(t1) == 3
     ss = "ab12ab"
     assert max(build.dp_fw(2,3, ss)) == 11
@@ -74,6 +91,13 @@ def test_case1_0():
     assert build.cost_to_build(*case1[0]) == expt1[0]
 def test_case1_1():
     assert build.cost_to_build(*case1[1]) == expt1[1]
+
+def test_case7():
+    cases = load_cases(case7_path)
+    for case, expt in zip(cases, expt7):
+        print(case)
+        print(expt)
+        assert build.cost_to_build(*case) == expt
 
 def no_test_dp_case0_0():
     tbl = build.dp_fw(*case0[0])
