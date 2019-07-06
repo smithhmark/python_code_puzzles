@@ -99,47 +99,47 @@ def test_case7():
         print(expt)
         assert build.cost_to_build(*case) == expt
 
-def no_test_dp_case0_0():
+def test_dp_case0_0():
     tbl = build.dp_fw(*case0[0])
     assert max(tbl) == expt0[0]
 
-def no_test_dp_case0_1():
+def test_dp_case0_1():
     tbl = build.dp_fw(*case0[1])
     print("final:",tbl)
     print(expt0[1])
     assert max(tbl) == expt0[1]
 
-def no_test_dp_case1_0():
+def test_dp_case1_0():
     tbl = build.dp_fw(*case1[0])
     print(case1[0])
     print(tbl)
     assert max(tbl) == expt1[0]
 
-def no_test_dp_case1_1():
+def test_dp_case1_1():
     tbl = build.dp_fw(*case1[1])
     print(case1[1])
     print(tbl)
     assert max(tbl) == expt1[1]
 
-def no_test_dp_case1_2():
+def test_dp_case1_2():
     tbl = build.dp_fw(*case1[2])
     print(case1[2])
     print(tbl)
     assert max(tbl) == expt1[2]
 
-def no_test_dp_case3_0():
+def test_dp_case3_0():
     tbl = build.dp_fw(*case3[0])
     print("final:",tbl)
     print(expt3[0])
     assert max(tbl) == expt3[0]
 
-def no_test_dp_case3_1():
+def test_dp_case3_1():
     tbl = build.dp_fw(*case3[1])
     print("final:",tbl)
     print(expt3[1])
     assert max(tbl) == expt3[1]
 
-def no_test_dp_case3_2():
+def test_dp_case3_2():
     tbl = build.dp_fw(*case3[2])
     print("final:",tbl)
     print(expt3[2])
@@ -165,14 +165,14 @@ def test_case5_1():
 def test_case5_2():
     assert build.cost_to_build(*case5[2]) == expt5[2]
 
-def no_test_dp_case5_0():
+def test_dp_case5_0():
     got = build.dp_fw(*case5[0])
     expt = expt5[0]
     print(max(got))
     print(expt)
     assert max(got) == expt
 
-def no_test_dp_case5_1():
+def test_dp_case5_1():
     print(case5[1])
     print(expt5[1])
     got = max(build.dp_fw(*case5[1]))
@@ -181,5 +181,5 @@ def no_test_dp_case5_1():
     print(expt)
     assert got == expt
 
-def no_test_dp_case5_2():
+def test_dp_case5_2():
     assert max(build.dp_fw(*case5[2])) == expt5[2]
