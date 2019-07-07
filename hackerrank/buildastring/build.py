@@ -61,15 +61,16 @@ def dp_fw(single, substr, target):
     N = len(target)
     ti = 0
     dp = [0] * (N+1)
-    min_copy = _min_width(single, substr)
     #print(single, substr, target)
     while ti < N:
         #print(" {} : {}".format(ti,target[ti]))
         dpi = ti + 1
         append_cost = dp[dpi-1] + single
+        #print("finding longest")
         longest, whr = _find_longest_ending_here(target, ti)
         if longest is None:
             copy_cost = sys.maxsize
+            #dp[dpi] = append_cost
         else:
             matched_len = len(longest)
             copy_cost = substr + dp[dpi-matched_len]
@@ -77,6 +78,30 @@ def dp_fw(single, substr, target):
         dp[dpi] = final_cost
         ti += 1
     return dp
+
+def scan_for_prefix(target):
+    N = len(target)
+    jumps = [-1] * (N)
+    prevs = [-1] * (N)
+    prefs = {}
+    ii = N - 1
+    longest, whr = _find_longest_ending_here(target, ii)
+    #print(" found:", longest)
+    while ii > 0:
+        if longest is not None:
+            matched_len = len(longest)
+            prev_idx = ii - matched_len
+            for jj in range(ii - matched_len+1, ii+1):
+                jumps[jj] = whr
+                prevs[jj] = prev_idx
+                prefs[jj] = longest[:jj - (ii - matched_len +1) + 1]
+            ii -= matched_len
+        else:
+            ii -= 1
+        #print("   ii:", ii, "target:", target[:ii+1])
+        longest, whr = _find_longest_ending_here(target, ii, 1)
+        #print("   found:", longest)
+    return jumps, prefs, prevs
 
 def cost_to_build(single, substr, target):
     table1 = dp_fw(single, substr, target)

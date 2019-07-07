@@ -1,4 +1,5 @@
 import math
+import pytest
 
 import build
 
@@ -28,6 +29,14 @@ expt5=[65040, 126246, 268964, ]
 
 case7_path = './input07.txt'
 expt7 = [107176, 471776, 2607120 ]
+
+case11_path = './input11.txt'
+expt11 = [400809, 729904, 32225646]
+
+@pytest.fixture
+def test11_cases():
+    cases = load_cases(case11_path)
+    return list(zip(cases, expt11))
 
 def load_cases(path):
     cases = []
@@ -70,6 +79,14 @@ def test_case_simple2():
 def test_recursive_case_simple2():
     ss = "ab12ab"
     assert build.recursive(2,3, ss) == 11
+def test_scan_for_prefix():
+    target = case0[0][-1]
+    jumps, prefs, prevs = build.scan_for_prefix(target)
+    print(target)
+    print(prefs)
+    print(jumps)
+    print(prevs)
+    #assert False
 
 def test_dp_simple0():
     ss = "aab"
@@ -95,6 +112,12 @@ def test_case1_1():
 def test_case7():
     cases = load_cases(case7_path)
     for case, expt in zip(cases, expt7):
+        print(case)
+        print(expt)
+        assert build.cost_to_build(*case) == expt
+
+def test_case11(test11_cases):
+    for case, expt in test11_cases:
         print(case)
         print(expt)
         assert build.cost_to_build(*case) == expt
