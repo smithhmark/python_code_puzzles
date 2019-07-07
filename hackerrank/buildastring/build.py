@@ -69,13 +69,13 @@ def dp_fw(single, substr, target):
         #print("finding longest")
         longest, whr = _find_longest_ending_here(target, ti)
         if longest is None:
-            copy_cost = sys.maxsize
-            #dp[dpi] = append_cost
+            #copy_cost = sys.maxsize
+            dp[dpi] = append_cost
         else:
             matched_len = len(longest)
             copy_cost = substr + dp[dpi-matched_len]
-        final_cost = min(append_cost, copy_cost)
-        dp[dpi] = final_cost
+            final_cost = min(append_cost, copy_cost)
+            dp[dpi] = final_cost
         ti += 1
     return dp
 
