@@ -6,6 +6,7 @@ https://www.hackerrank.com/challenges/build-a-string/problem
 """
 import sys
 import math
+import bisect
 
 """
 012345
@@ -31,7 +32,7 @@ def _find_longest_ending_here(target, idx, min_len=1):
     if found_at > -1:
         return matched, found_at
     else:
-        return None, None
+        return '', -1
 
 def _find_longest_starting_here(target, idx, min_len=1):
     N=len(target)
@@ -57,22 +58,90 @@ def _find_longest_starting_here(target, idx, min_len=1):
     else:
         return None, None
 
+def longest_prefix(target, ti, prefs):
+    ss = target[ti]
+    left = bisect.bisect_left(prefs, (ss, ti))
+    right = bisect.bisect_right(prefs, (chr(ord(ss) + 1),ti))
+    back = 1
+    while prefs[left].startswith(ss) :
+        back += 1
+        ss = target[ti-back:ti+1]
+        ss = ss[::-1]
+        left = bisect.bisect_left(prefs, target[ti], left, right)
+
+def build_inv_prefix_array(target):
+    N = len(target)
+    prefs = []
+    rtarg = target[::-1]
+    for ii in range(N):
+        prefs.append((rtarg[ii:], (N-1) -ii))
+    prefs.sort()
+    return prefs
+
+def find_longest_prestring(target, idx, iprefs):
+    matched_len = 0
+    #leftward_prefs = list(filter(lambda x: x[1] <= idx, iprefs))
+    leftward_prefs =iprefs
+    N = len(iprefs)
+    #right_limit = bisect.bisect_right(leftward_prefs, (target[:idx+1][::-1], ))
+    cc = target[idx]
+    right_limit = bisect.bisect_right(leftward_prefs, (chr(ord(cc) + 1),idx))
+    #print("  target:", target)
+    #print("  idx:", idx)
+    #print("  lw:", leftward_prefs)
+    left_limit = 0
+    for search_len in range(1, (idx+1)//2 + 1):
+        looking_for = target[idx-(search_len-1):idx+1][::-1]
+        #print("    looking_for:", looking_for)
+        cur_pref = bisect.bisect_left(leftward_prefs, (looking_for, ), left_limit, right_limit)
+        left_limit = cur_pref
+        #print("    found at:", cur_pref)
+        pref = leftward_prefs[cur_pref]
+        #print("    pref:", pref)
+        keep_looking = False
+        #while cur_pref < right_limit:
+        while cur_pref < N:
+            pref = leftward_prefs[cur_pref]
+            #print("      pref:", pref)
+            if pref[0].startswith(looking_for):
+                if pref[1] >= idx:
+                    #print("      skipping too-new pref at:", cur_pref)
+                    cur_pref += 1
+                elif pref[1] > idx - search_len:
+                    #print("      skipping overlap pref at:", cur_pref)
+                    cur_pref += 1
+                else:
+                    #print("      found older pref at:", cur_pref)
+                    matched_len += 1
+                    keep_looking = True
+                    break
+            else:
+                #print("      reached end of run")
+                break
+        if not keep_looking:
+            break
+    #print("  ret:", matched_len)
+    return matched_len
+
 def dp_fw(single, substr, target):
     N = len(target)
     ti = 0
     dp = [0] * (N+1)
+    iprefs = build_inv_prefix_array(target)
     #print(single, substr, target)
     while ti < N:
         #print(" {} : {}".format(ti,target[ti]))
         dpi = ti + 1
         append_cost = dp[dpi-1] + single
-        #print("finding longest")
-        longest, whr = _find_longest_ending_here(target, ti)
-        if longest is None:
+        #print(" finding longest")
+        #matched, whr = _find_longest_ending_here(target, ti)
+        #matched_len = len(matched)
+        matched_len = find_longest_prestring(target, ti, iprefs)
+        #print("found longest:", target[ti-(matched_len-1):ti+1], "from:", ti)
+        if matched_len == 0:
             #copy_cost = sys.maxsize
             dp[dpi] = append_cost
         else:
-            matched_len = len(longest)
             copy_cost = substr + dp[dpi-matched_len]
             final_cost = min(append_cost, copy_cost)
             dp[dpi] = final_cost
@@ -88,7 +157,7 @@ def scan_for_prefix(target):
     longest, whr = _find_longest_ending_here(target, ii)
     #print(" found:", longest)
     while ii > 0:
-        if longest is not None:
+        if longest:
             matched_len = len(longest)
             prev_idx = ii - matched_len
             for jj in range(ii - matched_len+1, ii+1):
@@ -187,7 +256,7 @@ def _recur(single, substr, target, idx):
     print(" " * idx,idx, target[idx], "acost:",append_cost)
     min_width = _min_width(single, substr)
     longest, whr = _find_longest_ending_here(target, idx, min_width)
-    if longest is not None:
+    if longest:
         matched_len = len(longest)
         copy_cost = substr + _recur(single, substr, target, idx-matched_len)
         print(" " * idx,idx, target[idx], "ccost:",copy_cost, "l:",longest)

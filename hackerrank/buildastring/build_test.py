@@ -38,6 +38,69 @@ def test11_cases():
     cases = load_cases(case11_path)
     return list(zip(cases, expt11))
 
+def test_build_inv_prefix_array():
+    case = case0[0][-1]
+    expt = [
+            ('a',0),
+            ('aa',1),
+            ('aabaa',4),
+            ('abaa',3),
+            ('abacaabaa',8),
+            ('acaabaa',6),
+            ('baa',2),
+            ('bacaabaa',7),
+            ('caabaa',5),
+            ]
+    got = build.build_inv_prefix_array(case)
+    assert got == expt
+def test_find_longest_prestring():
+    case = case0[0][-1]
+    iprefs = [
+            ('a',0),
+            ('aa',1),
+            ('aabaa',4),
+            ('abaa',3),
+            ('abacaabaa',8),
+            ('acaabaa',6),
+            ('baa',2),
+            ('bacaabaa',7),
+            ('caabaa',5),
+            ]
+    got = build.find_longest_prestring(case, 0, iprefs)
+    expt = 0
+    assert got == expt
+    got = build.find_longest_prestring(case, 1, iprefs)
+    expt = 1
+    assert got == expt
+    got = build.find_longest_prestring(case, 2, iprefs)
+    expt = 0
+    assert got == expt
+    got = build.find_longest_prestring(case, 3, iprefs)
+    expt = 1
+    assert got == expt
+    got = build.find_longest_prestring(case, 4, iprefs)
+    expt = 2
+    assert got == expt
+    case = case1[1][-1] #(1, 3, "acbbqbbqbb"),
+    iprefs = build.build_inv_prefix_array(case)
+    print(iprefs)
+    for ii in range(3):
+        assert build.find_longest_prestring(case,ii, iprefs) == 0
+    got = build.find_longest_prestring(case,3, iprefs)
+    assert got == 1
+    got = build.find_longest_prestring(case,4, iprefs)
+    assert got == 0
+    got = build.find_longest_prestring(case,5, iprefs)
+    assert got == 1
+    got = build.find_longest_prestring(case,6, iprefs)
+    assert got == 2
+    got = build.find_longest_prestring(case,7, iprefs)
+    assert got == 3
+    got = build.find_longest_prestring(case,8, iprefs)
+    assert got == 3
+    got = build.find_longest_prestring(case,9, iprefs)
+    assert got == 3
+
 def load_cases(path):
     cases = []
     with open(path, "r") as ifil:
@@ -60,14 +123,14 @@ def test_recursive_simple1():
 def test_find_longest_ending_here():
     target = case0[0][-1]
     matched, whr = build._find_longest_ending_here(target, 0)
-    assert matched is None
+    assert matched == ''
     matched, whr = build._find_longest_ending_here(target, 4)
     assert matched == "aa"
     assert whr == 0
 
     target = case0[1][-1]
     matched, whr = build._find_longest_ending_here(target, 0)
-    assert matched is None
+    assert matched == ''
     matched, whr = build._find_longest_ending_here(target, 5)
     assert matched == "bac"
     assert whr == 0
@@ -123,6 +186,7 @@ def test_case11_0(test11_cases):
     print(expt)
     assert build.cost_to_build(*case) == expt
 
+@pytest.mark.skip
 def test_case11_1(test11_cases):
     case, expt = test11_cases[1]
     print(case)
