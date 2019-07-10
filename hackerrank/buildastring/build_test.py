@@ -172,6 +172,66 @@ def test_case1_0():
 def test_case1_1():
     assert build.cost_to_build(*case1[1]) == expt1[1]
 
+def test_case7_1_prefs_2():
+    case = 'abcd abcd abcd abcd abcd'
+    case = 'abc abc abc abc'
+    case = "".join(case.split())
+    iprefs = build.build_inv_prefix_array(case)
+    for ii in range(len(case)):
+        matched, whr = build._find_longest_ending_here(case, ii)
+        matched_len = len(matched)
+        len2 = build.find_longest_prestring(case, ii, iprefs)
+        print("ii:{} len1:{} len2:{}".format(ii, matched_len, len2))
+        assert matched_len == len2
+
+def test_case7_1_prefs():
+    case = 'cbaakkobaakktcbaakkob'
+    #print(build.build_inv_prefix_array(case))
+    iprefs = [
+            ('aabc', 3),
+            ('aabctkkaabokkaabc', 16),
+            ('aabokkaabc', 9),
+            ('abc', 2),
+            ('abctkkaabokkaabc', 15),
+            ('abokkaabc', 8),
+            ('bc', 1),
+            ('bctkkaabokkaabc', 14),
+            ('bokkaabc', 7),
+            ('bokkaabctkkaabokkaabc', 20),
+            ('c', 0),
+            ('ctkkaabokkaabc', 13),
+            ('kaabc', 4),
+            ('kaabctkkaabokkaabc', 17),
+            ('kaabokkaabc', 10),
+            ('kkaabc', 5),
+            ('kkaabctkkaabokkaabc', 18),
+            ('kkaabokkaabc', 11),
+            ('okkaabc', 6),
+            ('okkaabctkkaabokkaabc', 19),
+            ('tkkaabokkaabc', 12)
+            ]
+    assert build.find_longest_prestring(case, 0, iprefs) == 0
+    assert build.find_longest_prestring(case, 1, iprefs) == 0
+    assert build.find_longest_prestring(case, 2, iprefs) == 0
+    assert build.find_longest_prestring(case, 3, iprefs) == 1
+    assert build.find_longest_prestring(case, 4, iprefs) == 0
+    assert build.find_longest_prestring(case, 5, iprefs) == 1
+    assert build.find_longest_prestring(case, 6, iprefs) == 0
+    assert build.find_longest_prestring(case, 8, iprefs) == 2
+    assert build.find_longest_prestring(case, 9, iprefs) == 3
+    assert build.find_longest_prestring(case, 20, iprefs) == 8
+
+def test_case7_1():
+    cases = load_cases(case7_path)
+    case = cases[1]
+    expt = expt7[1]
+    print(case)
+    print(expt)
+    got = build.cost_to_build(*case)
+    print(build.build_inv_prefix_array(case[-1][:75]))
+    print(case[-1][70:80])
+    assert got == expt
+
 def test_case7():
     cases = load_cases(case7_path)
     for case, expt in zip(cases, expt7):

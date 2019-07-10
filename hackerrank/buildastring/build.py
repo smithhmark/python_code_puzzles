@@ -34,6 +34,15 @@ def _find_longest_ending_here(target, idx, min_len=1):
     else:
         return '', -1
 
+def lcp(left, right):
+    cnt = 0
+    for li, ri in zip(left, right):
+        if li == ri:
+            cnt += 1
+        else:
+            return cnt
+    return cnt
+
 def _find_longest_starting_here(target, idx, min_len=1):
     N=len(target)
     found = 0
@@ -78,50 +87,76 @@ def build_inv_prefix_array(target):
     prefs.sort()
     return prefs
 
+def build_lcp_array(suffs):
+    lcps = []
+    for ii in range(1, len(suffs)):
+        lcps.append(lcp(suffs[ii-1], suffs[ii]))
+    return lcps
+
 def find_longest_prestring(target, idx, iprefs):
-    matched_len = 0
-    #leftward_prefs = list(filter(lambda x: x[1] <= idx, iprefs))
-    leftward_prefs =iprefs
     N = len(iprefs)
-    #right_limit = bisect.bisect_right(leftward_prefs, (target[:idx+1][::-1], ))
+    #leftward_prefs = list(filter(lambda x: x[1] <= idx, iprefs))
+    #print("t:", target, "i:", idx)
+    #print("iprefs:", iprefs)
     cc = target[idx]
+    leftward_prefs =iprefs
     right_limit = bisect.bisect_right(leftward_prefs, (chr(ord(cc) + 1),idx))
-    #print("  target:", target)
-    #print("  idx:", idx)
-    #print("  lw:", leftward_prefs)
-    left_limit = 0
-    for search_len in range(1, (idx+1)//2 + 1):
-        looking_for = target[idx-(search_len-1):idx+1][::-1]
-        #print("    looking_for:", looking_for)
-        cur_pref = bisect.bisect_left(leftward_prefs, (looking_for, ), left_limit, right_limit)
-        left_limit = cur_pref
-        #print("    found at:", cur_pref)
-        pref = leftward_prefs[cur_pref]
-        #print("    pref:", pref)
-        keep_looking = False
-        #while cur_pref < right_limit:
-        while cur_pref < N:
-            pref = leftward_prefs[cur_pref]
-            #print("      pref:", pref)
-            if pref[0].startswith(looking_for):
-                if pref[1] >= idx:
-                    #print("      skipping too-new pref at:", cur_pref)
-                    cur_pref += 1
-                elif pref[1] > idx - search_len:
-                    #print("      skipping overlap pref at:", cur_pref)
-                    cur_pref += 1
-                else:
-                    #print("      found older pref at:", cur_pref)
-                    matched_len += 1
-                    keep_looking = True
-                    break
-            else:
-                #print("      reached end of run")
-                break
-        if not keep_looking:
-            break
-    #print("  ret:", matched_len)
-    return matched_len
+    #print("right_limit:", right_limit)
+    #print("initial ri based on", target[:idx+1][::-1])
+    ri = bisect.bisect_right(leftward_prefs, (target[:idx+1][::-1], ))
+    li = ri -1
+    #print("  ri:", ri)
+    lcp1 =  0
+    lcp2 =  0
+    if ri == 0:
+        #print("  nolonger returning")
+        lcp1 = 0
+    else:
+        while li >=0 and leftward_prefs[li][1] >= leftward_prefs[ri][1]:
+            li -= 1
+        #print("  li:", li)
+        lcp1 = lcp(leftward_prefs[li][0], leftward_prefs[ri][0])
+        pos_dif = leftward_prefs[ri][1] - leftward_prefs[li][1]
+        if lcp1 > pos_dif:
+            # could have overlap
+            lcp1 = pos_dif
+            if li > 0:
+                li -= 1 # try next one
+                while li >=0 and leftward_prefs[li][1] >= leftward_prefs[ri][1]:
+                    li -= 1
+                if li > -1:
+                    #print("trying at:", li)
+                    hmm = lcp(leftward_prefs[li][0], leftward_prefs[ri][0])
+                    #print("hmm:", hmm)
+                    if hmm > pos_dif:
+                        lcp1 = hmm
+    li = ri
+    if li == N-1:
+        lcp2 = 0
+    else:
+        ri = li + 1
+        while ri < right_limit and leftward_prefs[ri][1] >= leftward_prefs[li][1]:
+            ri += 1
+        #print("  ri:", ri)
+        if ri == right_limit:
+            lcp2 = 0
+        else:
+            lcp2 = lcp(leftward_prefs[li][0], leftward_prefs[ri][0])
+            pos_dif = leftward_prefs[li][1] - leftward_prefs[ri][1]
+            if lcp2 > pos_dif:
+                #could have overlap
+                lcp2 = pos_dif
+                ri += 1
+                while (ri < right_limit 
+                        and leftward_prefs[ri][1] >= leftward_prefs[li][1]):
+                    ri += 1
+                if ri < right_limit:
+                    hmm = lcp(leftward_prefs[li][0], leftward_prefs[ri][0])
+                    if hmm > pos_dif:
+                        lcp2 = hmm
+    #print("  lcp1", lcp1)
+    #print("  lcp2", lcp2)
+    return max(lcp1, lcp2)
 
 def dp_fw(single, substr, target):
     N = len(target)
@@ -137,7 +172,7 @@ def dp_fw(single, substr, target):
         #matched, whr = _find_longest_ending_here(target, ti)
         #matched_len = len(matched)
         matched_len = find_longest_prestring(target, ti, iprefs)
-        #print("found longest:", target[ti-(matched_len-1):ti+1], "from:", ti)
+        #print("@", ti, "longest:'{}'".format(target[ti-(matched_len-1):ti+1]))
         if matched_len == 0:
             #copy_cost = sys.maxsize
             dp[dpi] = append_cost
@@ -180,7 +215,7 @@ def cost_to_build(single, substr, target):
 SUBSTR_MEMO = {}
 COST_MEMO = {}
 def _recur_append(single, substr, target, idx, cost):
-    print(" " * idx, "A:",target[idx], idx, cost)
+    #print(" " * idx, "A:",target[idx], idx, cost)
     cost_id =(target, idx, single, substr, "A")
     if cost_id in COST_MEMO:
         prior_cost = COST_MEMO.get(cost_id)
@@ -208,14 +243,14 @@ def _recur_copy(single, substr, target, idx, cost):
         #longest_here, found_at = _find_longest_starting_here(target, idx)
         #SUBSTR_MEMO[(target, idx)] = longest_here
     else:
-        print(" " * idx, "A:",target[idx], idx, cost)
+        #print(" " * idx, "A:",target[idx], idx, cost)
         tmp = cost + substr
         llen = len(longest_here)
         next_idx = idx + llen -1
         if next_idx == len(target) -1:
             return tmp
         elif next_idx > len(target) -1:
-            print("ahhhh", longest_here)
+            #print("ahhhh", longest_here)
             return tmp
         else:
             #print("nxt idx:", next_idx)
@@ -250,16 +285,16 @@ def _recur(single, substr, target, idx):
         return prior_cost
     if idx == 0 :
         COST_MEMO[cost_id] = single
-        print(" " * idx,idx, target[idx], "acost:",single)
+        #print(" " * idx,idx, target[idx], "acost:",single)
         return single
     append_cost = single + _recur(single, substr, target, idx -1)
-    print(" " * idx,idx, target[idx], "acost:",append_cost)
+    #print(" " * idx,idx, target[idx], "acost:",append_cost)
     min_width = _min_width(single, substr)
     longest, whr = _find_longest_ending_here(target, idx, min_width)
     if longest:
         matched_len = len(longest)
         copy_cost = substr + _recur(single, substr, target, idx-matched_len)
-        print(" " * idx,idx, target[idx], "ccost:",copy_cost, "l:",longest)
+        #print(" " * idx,idx, target[idx], "ccost:",copy_cost, "l:",longest)
     else:
         copy_cost = sys.maxsize
     final_cost = min(append_cost, copy_cost)
