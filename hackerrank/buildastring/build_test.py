@@ -172,6 +172,24 @@ def test_case1_0():
 def test_case1_1():
     assert build.cost_to_build(*case1[1]) == expt1[1]
 
+@pytest.mark.skip
+def test_case7_2_prefs_2():
+    case = 'cccccccjgcccccccccjgc'
+    iprefs = build.build_inv_prefix_array(case)
+    slows =[]
+    fasts = []
+    for ii in range(len(case)):
+        matched, whr = build._find_longest_ending_here(case, ii)
+        slow = len(matched)
+        fast = build.find_longest_prestring(case, ii, iprefs)
+        #print("ii:{} slow:{} fast:{}".format(ii, slow, fast))
+        #assert slow == fast
+        slows.append(slow)
+        fasts.append(fast)
+    for ii, (slow, fast) in enumerate(zip(slows, fasts)):
+        print("ii:{} len1:{} len2:{}".format(ii, slow, fast))
+    assert slows == fasts
+
 def test_case7_1_prefs_2():
     case = 'abcd abcd abcd abcd abcd'
     case = 'abc abc abc abc'

@@ -156,7 +156,7 @@ def find_longest_prestring(target, idx, iprefs):
                         lcp2 = hmm
     #print("  lcp1", lcp1)
     #print("  lcp2", lcp2)
-    return max(lcp1, lcp2)
+    return min(max(lcp1, lcp2), math.ceil(idx/2))
 
 def dp_fw(single, substr, target):
     N = len(target)
